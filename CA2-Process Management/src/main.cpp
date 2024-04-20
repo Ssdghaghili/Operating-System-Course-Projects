@@ -3,6 +3,7 @@
 #include <sstream>
 #include <vector>
 #include <stdexcept>
+#include <filesystem>
 
 using namespace std;
 
@@ -21,11 +22,11 @@ struct classifier
 
 
 
-vector<item> readDataSet()
+vector<item> readDataSet(const string& folderPath)
 {
     int count = 0;
     vector<item> data;
-    string filename = "./rsc/validation/dataset.csv";
+    string filename = folderPath + "/dataset.csv";
 
     ifstream file(filename);
     if (!file.is_open()) {
@@ -74,10 +75,10 @@ vector<item> readDataSet()
     return data;
 }
 
-vector<int> readLabels(){
+vector<int> readLabels(const string& folderPath){
     int count = 0;
     vector<int> labels;
-    string filename = "./rsc/validation/labels.csv";
+    string filename = folderPath + "/labels.csv";
 
     ifstream file(filename);
     if (!file.is_open()) {
@@ -112,16 +113,28 @@ vector<int> readLabels(){
 
 }
 
-int main() {
-    vector<item> items = readDataSet();
-    vector<int> labels = readLabels();
+vector<classifier> reedClassifier(const string& folderPath){
+    
+}
+
+int main(int argc, char *argv[]) {
+
+    string validation_folder = argv[1];
+    string weights_folder = argv[2];
 
 
 
+    vector<item> items = readDataSet(validation_folder);
+    vector<int> labels = readLabels(validation_folder);
+    // vector<classifier> weights = reedClassifier(folderPath);
 
 
-/*                 ------------------- Print ---------------------                  */
 
+    /*                 ------------------- Print ---------------------                  */
+
+
+    // cout << "Validation folder: " << validation_folder << endl;
+    
     // for (const auto &it : items)
     // {
     //     cout << "Length: " << it.length << ", Width: " << it.width << endl;
@@ -131,6 +144,7 @@ int main() {
     // {
     //     cout << it << endl;
     // }
+
 
     return 0;
 }
