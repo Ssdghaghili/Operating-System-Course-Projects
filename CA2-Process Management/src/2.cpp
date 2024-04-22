@@ -15,6 +15,7 @@
 
 using namespace std;
 
+
 struct item
 {
     double length;
@@ -243,7 +244,7 @@ double calculatePrediction(vector<item> item, vector<classifier> weights, int in
 
 }
 
-vector<int> calculatePrediction(vector<int> main_labels, vector<int> predicted_labels)
+vector<int> finalPrediction(vector<int> main_labels, vector<int> predicted_labels)
 {
     vector<int> result;
     int correct = 0;
@@ -265,134 +266,82 @@ vector<int> calculatePrediction(vector<int> main_labels, vector<int> predicted_l
     return result;
 }
 
-vector<int> calculatePrediction(vector<int> main_labels, vector<int> predicted_labels)
-{
-    vector<int> result;
-    int correct = 0;
-    int wrong = 0;
-    for (int i = 0; i < main_labels.size(); i++)
-    {
-        if (main_labels[i] == predicted_labels[i])
-        {
-            correct++;
-        }
-        else
-        {
-            wrong++;
-        }
-    }
-    result.push_back(correct);
-    result.push_back(wrong);
 
-    return result;
-}
 
 int main(int argc, char *argv[]) {
+
+    // string buffer = "classifier_3.csv";
+    // int index = 326;
 
     string validation_folder = argv[1];
     string weights_folder = argv[2];
 
+
     vector<item> items = readDataSet(validation_folder);
     vector<int> main_labels = readLabels(validation_folder);
+    vector<string> csvFiles = readWeightFiles(weights_folder);
 
-    vector<int> predicted_labels;
+    vector<double> predicted_labels;
+    vector<int> final_item_labels;
+    vector<int> result;
 
+    for (int j = 0; j < items.size(); j++)
+    {
+        int index = j;
+        for (int i = 0; i < csvFiles.size(); i++)
+        {
+            vector<classifier> weights = readClassifierDatas(weights_folder, csvFiles[i]);
+            int x = calculatePrediction(items, weights, index);
+            predicted_labels.push_back(static_cast<double>(x));
+        }
 
-    int pipefd[2];
-    pid_t Combined_classification;
-
-    // Create the pipe
-    if (pipe(pipefd) == -1) {
-        perror("pipe Combined_classification error");
-        return 1;
+        final_item_labels.push_back(findMaxLable(predicted_labels));
+        predicted_labels.clear();
     }
 
-    // Create a child process
-    Combined_classification = fork();
+    
+    
+    result = finalPrediction(main_labels, final_item_labels);
+    
+    // cout << final_item_labels[0] << endl;
 
-    if (Combined_classification == -1) {
-        perror("fork error");
-        return 1;
-    } 
-    else if (Combined_classification == 0)
-    { 
-        // Child process (Combined classifier process)
-        close(pipefd[1]); // Close the write end of the pipe in the child
+    // for (int j = 0; j < predicted_labels.size(); j++)
+    // {
+    //     cout << predicted_labels[j] << endl;
+    // }
 
-        // Read from the pipe
-        char buffer[20];
-        read(pipefd[0], buffer, sizeof(buffer));
-        // std::cout << "Combined classifier process received message: " << buffer << std::endl;
 
-        // Perform some calculation on the received string
-        vector<classifier> weights = readClassifierDatas(weights_folder, buffer);
-        int x = calculatePrediction(items, weights, index);
-        predicted_labels.push_back(x);
 
-        // Pass the result to Voter process using another unnamed pipe
-        int pipefd_voter[2];
-        if (pipe(pipefd_voter) == -1) {
-            perror("pipe error");
-            return 1;
-        }
+    /*                 ------------------- Print ---------------------                  */
 
-        pid_t Voter_process = fork();
 
-        if (Voter_process == -1) {
-            perror("fork error");
-            return 1;
-        } 
-        else if (Voter_process == 0) {
-            // Child process (Voter process)
-            close(pipefd_voter[1]); // Close the write end of the pipe in the child
+    // cout << "Validation folder: " << validation_folder << endl;
+    
+    // for (const auto &it : items)
+    // {
+    //     cout << "Length: " << it.length << ", Width: " << it.width << endl;
+    // }
 
-            // Read from the pipe
-            char buffer_voter[20];
-            read(pipefd_voter[0], buffer_voter, sizeof(buffer_voter));
-            std::cout << "Voter process received message: " << buffer_voter << std::endl;
+    // for (const auto &it : labels)
+    // {
+    //     cout << it << endl;
+    // }
 
-            // Close the read end of the pipe in the child
-            close(pipefd_voter[0]);
+    // for (int i = 0; i < predicted_labels.size(); i++){
+    //     cout << predicted_labels[i] << endl;
+    // }
 
-            return 0;
-        } 
-        else {
-            // Parent process (Combined classifier process)
-            // Write to the pipe
-            write(pipefd_voter[1], buffer, strlen(buffer) + 1);
+    cout << result[0] << " " << result[1] << endl;
 
-            // Close the write end of the pipe in the parent
-            close(pipefd_voter[1]);
-
-            // Wait for the Voter process to finish
-            wait(NULL);
-
-            // Close the read end of the pipe in the child
-            close(pipefd_voter[0]);
-
-            // Close the read end of the pipe in the parent
-            close(pipefd[0]);
-
-            return 0;
-        }
-    } 
-    else 
-    { 
-        // Parent process (Combined classification process)
-        close(pipefd[0]); // Close the read end of the pipe in the parent
-
-        // Write to the pipe
-        const char* message = "Hello from parent!";
-        write(pipefd[1], message, strlen(message) + 1);
-
-        // Close the write end of the pipe in the parent
-        close(pipefd[1]);
-
-        // Wait for the Combined classifier process to finish
-        wait(NULL);
+    // // Print the names of CSV files
+    // for (const auto& filename : csvFiles) {
+    //     cout << filename << endl;
+    // }
 
         return 0;
-    }
-
-    return 0;
 }
+
+
+
+
+
