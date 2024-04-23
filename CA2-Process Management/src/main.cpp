@@ -243,7 +243,7 @@ double calculatePrediction(vector<item> item, vector<classifier> weights, int in
 
 }
 
-vector<int> calculatePrediction(vector<int> main_labels, vector<int> predicted_labels)
+vector<int> finalPrediction(vector<int> main_labels, vector<int> predicted_labels)
 {
     vector<int> result;
     int correct = 0;
@@ -265,27 +265,7 @@ vector<int> calculatePrediction(vector<int> main_labels, vector<int> predicted_l
     return result;
 }
 
-vector<int> calculatePrediction(vector<int> main_labels, vector<int> predicted_labels)
-{
-    vector<int> result;
-    int correct = 0;
-    int wrong = 0;
-    for (int i = 0; i < main_labels.size(); i++)
-    {
-        if (main_labels[i] == predicted_labels[i])
-        {
-            correct++;
-        }
-        else
-        {
-            wrong++;
-        }
-    }
-    result.push_back(correct);
-    result.push_back(wrong);
 
-    return result;
-}
 
 int main(int argc, char *argv[]) {
 
@@ -294,9 +274,13 @@ int main(int argc, char *argv[]) {
 
     vector<item> items = readDataSet(validation_folder);
     vector<int> main_labels = readLabels(validation_folder);
+    vector<string> csvFiles = readWeightFiles(weights_folder);
 
     vector<int> predicted_labels;
+    vector<int> final_item_labels;
+    vector<int> result;
 
+    //up until here, the code is the same as 2.cpp
 
     int pipefd[2];
     pid_t Combined_classification;
@@ -313,7 +297,7 @@ int main(int argc, char *argv[]) {
     if (Combined_classification == -1) {
         perror("fork error");
         return 1;
-    } 
+    }
     else if (Combined_classification == 0)
     { 
         // Child process (Combined classifier process)

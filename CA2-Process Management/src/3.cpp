@@ -244,28 +244,6 @@ double calculatePrediction(vector<item> item, vector<classifier> weights, int in
 
 }
 
-vector<int> finalPrediction(vector<int> main_labels, vector<int> predicted_labels)
-{
-    vector<int> result;
-    int correct = 0;
-    int wrong = 0;
-    for (int i = 0; i < main_labels.size(); i++)
-    {
-        if (main_labels[i] == predicted_labels[i])
-        {
-            correct++;
-        }
-        else
-        {
-            wrong++;
-        }
-    }
-    result.push_back(correct);
-    result.push_back(wrong);
-
-    return result;
-}
-
 
 
 int main(int argc, char *argv[]) {
@@ -283,9 +261,7 @@ int main(int argc, char *argv[]) {
 
     vector<double> predicted_labels;
     vector<int> final_item_labels;
-    vector<int> result;
 
-    //up until here, added to main.cpp file
 
     for (int j = 0; j < items.size(); j++)
     {
@@ -303,7 +279,7 @@ int main(int argc, char *argv[]) {
 
     
     
-    result = finalPrediction(main_labels, final_item_labels);
+    
     
 
 
@@ -333,7 +309,6 @@ int main(int argc, char *argv[]) {
     //     cout << predicted_labels[i] << endl;
     // }
 
-    cout << result[0] << " " << result[1] << endl;
 
     // // Print the names of CSV files
     // for (const auto& filename : csvFiles) {
