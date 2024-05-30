@@ -1,6 +1,5 @@
-Operating System project 3 - serial and parallel image processing using thread
+Operating System project 3 - serial and parallel image filtering using thread
 Mohammad Sadegh Aghili
-810100274
 
 - first open new terminal tab at this folder
 - navigate to ./serial or ./parallel folder. (cd serial or cd parallel)
